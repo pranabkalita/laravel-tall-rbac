@@ -26,4 +26,5 @@ return [
     'edit_user_description' => 'Edit the user in the application',
     'update_user' => 'Update user',
     'user_created' => 'User created',
+    'please_confirm_your_password_before_continuing' => 'Please confirm your password before continuing.',
 ];

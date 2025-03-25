@@ -1,4 +1,33 @@
- <div class="flex flex-col gap-6">
+<?php
+
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Password;
+
+new
+#[Layout('components.layouts.auth')]
+#[Title('Forgot Password')]
+class extends Component {
+    public string $email = '';
+
+    /**
+     * Send a password reset link to the provided email address.
+     */
+    public function sendPasswordResetLink(): void
+    {
+        $this->validate([
+            'email' => ['required', 'string', 'email'],
+        ]);
+
+        Password::sendResetLink($this->only('email'));
+
+        session()->flash('status', __('A reset link will be sent if the account exists.'));
+    }
+}
+?>
+
+<div class="flex flex-col gap-6">
     <x-auth-header title="{{ __('global.forgot_password') }}" description="{{ __('global.forgot_password_description') }}" />
 
     <!-- Session Status -->
