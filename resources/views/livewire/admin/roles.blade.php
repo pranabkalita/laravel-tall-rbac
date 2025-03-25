@@ -10,62 +10,62 @@ use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
 
 new
-#[Layout('components.layouts.admin')]
-#[Title('Roles')]
-class extends Component
-{
-    use LivewireAlert;
-    use WithPagination;
-
-    /** @var array<string,string> */
-    protected $listeners = [
-        'roleDeleted' => '$refresh',
-    ];
-
-    #[Session]
-    public int $perPage = 10;
-
-    /** @var array<int,string> */
-    public array $searchableFields = ['name'];
-
-    #[Url]
-    public string $search = '';
-
-    public function mount(): void
+    #[Layout('components.layouts.admin')]
+    #[Title('Roles')]
+    class extends Component
     {
-        $this->authorize('view roles');
-    }
+        use LivewireAlert;
+        use WithPagination;
 
-    public function updatingSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function deleteRole(string $roleId): void
-    {
-        $this->authorize('delete roles');
-
-        $role = Role::query()->where('id', $roleId)->firstOrFail();
-
-        $role->delete();
-
-        $this->alert('success', __('roles.role_deleted'));
-
-        $this->dispatch('roleDeleted');
-    }
-
-    public function with(): array
-    {
-        return [
-            'roles' => Role::query()
-                ->with('permissions')
-                ->when($this->search, function ($query, $search): void {
-                    $query->whereAny($this->searchableFields, 'LIKE', "%$search%");
-                })
-                ->paginate($this->perPage),
+        /** @var array<string,string> */
+        protected $listeners = [
+            'roleDeleted' => '$refresh',
         ];
+
+        #[Session]
+        public int $perPage = 10;
+
+        /** @var array<int,string> */
+        public array $searchableFields = ['name'];
+
+        #[Url]
+        public string $search = '';
+
+        public function mount(): void
+        {
+            $this->authorize('view roles');
+        }
+
+        public function updatingSearch(): void
+        {
+            $this->resetPage();
+        }
+
+        public function deleteRole(string $roleId): void
+        {
+            $this->authorize('delete roles');
+
+            $role = Role::query()->where('id', $roleId)->firstOrFail();
+
+            $role->delete();
+
+            $this->alert('success', __('roles.role_deleted'));
+
+            $this->dispatch('roleDeleted');
+        }
+
+        public function with(): array
+        {
+            return [
+                'roles' => Role::query()
+                    ->with('permissions')
+                    ->when($this->search, function ($query, $search): void {
+                        $query->whereAny($this->searchableFields, 'LIKE', "%$search%");
+                    })
+                    ->paginate($this->perPage),
+            ];
+        }
     }
-}
 ?>
 
 <section class="w-full">
@@ -78,16 +78,16 @@ class extends Component
         </x-slot:subtitle>
         <x-slot:buttons>
             @can('create roles')
-                <flux:button href="{{ route('admin.roles.create') }}" variant="primary" icon="plus">
-                    {{ __('roles.create_role') }}
-                </flux:button>
+            <flux:button href="{{ route('admin.roles.create') }}" variant="primary" icon="plus">
+                {{ __('roles.create_role') }}
+            </flux:button>
             @endcan
         </x-slot:buttons>
     </x-page-heading>
 
     <div class="flex items-center justify-between w-full mb-6 gap-2">
-        <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto"/>
-        <flux:spacer/>
+        <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
+        <flux:spacer />
 
         <flux:select wire:model.live="perPage" class="!w-auto">
             <flux:select.option value="10">{{ __('global.10_per_page') }}</flux:select.option>
@@ -108,52 +108,51 @@ class extends Component
         </x-slot:head>
         <x-slot:body>
             @foreach($roles as $role)
-                <x-table.row wire:key="user-{{ $role->id }}">
-                    <x-table.cell>{{ $role->id }}</x-table.cell>
-                    <x-table.cell class="w-1/5 text-nowrap">{{ $role->name }}</x-table.cell>
-                    <x-table.cell>
-                        <div class="gap-2 inline-flex flex-wrap">
-                            @foreach($role->permissions as $permission)
-                                <flux:badge size="sm">
-                                    {{ $permission->name }}
-                                </flux:badge>
-                            @endforeach
+            <x-table.row wire:key="user-{{ $role->id }}">
+                <x-table.cell>{{ $role->id }}</x-table.cell>
+                <x-table.cell class="w-1/5 text-nowrap">{{ $role->name }}</x-table.cell>
+                <x-table.cell>
+                    <div class="gap-2 inline-flex flex-wrap">
+                        @foreach($role->permissions as $permission)
+                        <flux:badge size="sm">
+                            {{ $permission->name }}
+                        </flux:badge>
+                        @endforeach
+                    </div>
+                </x-table.cell>
+                <x-table.cell class="space-x-2 flex justify-end">
+                    @can('update roles')
+                    <flux:button href="{{ route('admin.roles.edit', $role) }}" size="sm">
+                        {{ __('global.edit') }}
+                    </flux:button>
+                    @endcan
+                    @can('delete roles')
+                    <flux:modal.trigger name="delete-role-{{ $role->id }}">
+                        <flux:button size="sm" variant="danger">{{ __('global.delete') }}</flux:button>
+                    </flux:modal.trigger>
+                    <flux:modal name="delete-role-{{ $role->id }}" class="min-w-[22rem] space-y-6 flex flex-col justify-between">
+                        <div>
+                            <flux:heading size="lg">{{ __('roles.delete_role') }}?</flux:heading>
+                            <flux:subheading>
+                                <p>{{ __('roles.you_are_about_to_delete') }}</p>
+                                <p>{{ __('global.this_action_is_irreversible') }}</p>
+                            </flux:subheading>
                         </div>
-                    </x-table.cell>
-                    <x-table.cell class="space-x-2 flex justify-end">
-                        @can('update roles')
-                            <flux:button href="{{ route('admin.roles.edit', $role) }}" size="sm">
-                                {{ __('global.edit') }}
+                        <div class="flex gap-2 !mt-auto mb-0">
+                            <flux:modal.close>
+                                <flux:button variant="ghost">
+                                    {{ __('global.cancel') }}
+                                </flux:button>
+                            </flux:modal.close>
+                            <flux:spacer />
+                            <flux:button type="submit" variant="danger" wire:click.prevent="deleteRole('{{ $role->id }}')">
+                                {{ __('roles.delete_role') }}
                             </flux:button>
-                        @endcan
-                        @can('delete roles')
-                            <flux:modal.trigger name="delete-role-{{ $role->id }}">
-                                <flux:button size="sm" variant="danger">{{ __('global.delete') }}</flux:button>
-                            </flux:modal.trigger>
-                            <flux:modal name="delete-role-{{ $role->id }}" class="min-w-[22rem] space-y-6 flex flex-col justify-between">
-                                <div>
-                                    <flux:heading size="lg">{{ __('roles.delete_role') }}?</flux:heading>
-                                    <flux:subheading>
-                                        <p>{{ __('roles.you_are_about_to_delete') }}</p>
-                                        <p>{{ __('global.this_action_is_irreversible') }}</p>
-                                    </flux:subheading>
-                                </div>
-                                <div class="flex gap-2 !mt-auto mb-0">
-                                    <flux:modal.close>
-                                        <flux:button variant="ghost">
-                                            {{ __('global.cancel') }}
-                                        </flux:button>
-                                    </flux:modal.close>
-                                    <flux:spacer/>
-                                    <flux:button type="submit" variant="danger"
-                                                 wire:click.prevent="deleteRole('{{ $role->id }}')">
-                                        {{ __('roles.delete_role') }}
-                                    </flux:button>
-                                </div>
-                            </flux:modal>
-                        @endcan
-                    </x-table.cell>
-                </x-table.row>
+                        </div>
+                    </flux:modal>
+                    @endcan
+                </x-table.cell>
+            </x-table.row>
             @endforeach
         </x-slot:body>
     </x-table>
