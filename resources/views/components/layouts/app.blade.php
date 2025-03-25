@@ -1,5 +1,5 @@
 <x-layouts.app.frontend>
-    <flux:main>
+    <div class="p-0">
         {{ $slot }}
-    </flux:main>
+    </div>
 </x-layouts.app.frontend>

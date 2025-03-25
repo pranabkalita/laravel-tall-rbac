@@ -6,20 +6,19 @@ use Livewire\Volt\Component;
 use App\Models\User;
 
 new
-#[Layout('components.layouts.admin')]
-#[Title('View User')]
-class extends Component
-{
-    public User $user;
-
-    public function mount(User $user): void
+    #[Layout('components.layouts.admin')]
+    #[Title('View User')]
+    class extends Component
     {
-        $this->authorize('view users');
+        public User $user;
 
-        $this->user = $user;
+        public function mount(User $user): void
+        {
+            $this->authorize('view users');
+
+            $this->user = $user;
+        }
     }
-
-}
 ?>
 
 <section class="w-full">

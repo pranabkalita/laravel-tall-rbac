@@ -14,9 +14,11 @@
         </a>
 
         <flux:navbar class="-mb-px max-lg:hidden">
+            @auth
             <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')" wire:navigate>
                 Dashboard
             </flux:navbar.item>
+            @endauth
 
             <flux:navbar.item icon="layout-grid" href="{{ route('proteins.index') }}" :current="request()->routeIs('proteins.index')" wire:navigate>
                 Proteins
@@ -81,18 +83,18 @@
                     </div>
                 </flux:menu.radio.group>
 
-                @can('access dashboard')
+                @auth
                 <flux:menu.separator />
                 <flux:menu.radio.group>
-                    <flux:menu.item href="{{ route('admin.index') }}" icon="shield">
+                    <flux:menu.item href="{{ route('admin.index') }}" icon="shield" wire:navigate>
                         {{ __('global.admin_dashboard') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
-                @endcan
+                @endauth
 
                 <flux:menu.separator />
                 <flux:menu.radio.group>
-                    <flux:menu.item href="/settings/profile" icon="cog">
+                    <flux:menu.item href="/settings/profile" icon="cog" wire:navigate>
                         {{ __('settings.title') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>

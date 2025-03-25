@@ -64,7 +64,6 @@ new
                     })
                     ->orderBy($this->sortField, $this->sortDirection)
                     ->paginate($this->perPage)
-                    ->withQueryString()
             ];
         }
     }
@@ -99,7 +98,7 @@ new
             <x-table.row wire:key="protein-{{ $protein->id }}">
                 <x-table.cell>{{ $protein->id }}</x-table.cell>
                 <x-table.cell>
-                    <x-text-link href="#">{{ $protein->name }}</x-text-link>
+                    <x-text-link href="{{ route('proteins.show', $protein->name) }}">{{ $protein->name }}</x-text-link>
                 </x-table.cell>
                 <x-table.cell>{{ $protein->articles_count }}</x-table.cell>
                 <x-table.cell>{{ $protein->mutations_count }}</x-table.cell>
