@@ -36,4 +36,6 @@ Route::middleware(['auth'])->group(function (): void {
     });
 });
 
-require __DIR__.'/auth.php';
+Volt::route('/proteins', 'proteins')->name('proteins.index');
+
+require __DIR__ . '/auth.php';
