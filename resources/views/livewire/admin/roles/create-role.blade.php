@@ -1,3 +1,63 @@
+<?php
+
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Volt\Component;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Validate;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+new
+#[Layout('components.layouts.admin')]
+#[Title('Create Role')]
+class extends Component
+{
+    use LivewireAlert;
+
+    #[Validate('required|string|max:255')]
+    public string $name = '';
+
+    /** @var array<mixed> */
+    #[Validate('array|min:1')]
+    public array $selectedPermissions = [];
+
+    public function mount(): void
+    {
+        $this->authorize('create roles');
+    }
+
+    public function createRole(): void
+    {
+        $this->authorize('create roles');
+
+        $this->validate();
+
+        $role = Role::create([
+            'name' => $this->name,
+        ]);
+
+        $permissions = collect($this->selectedPermissions)->map(fn ($permission): int =>
+            // convert string to int
+        (int) $permission)->toArray();
+
+        $role->syncPermissions($permissions);
+
+        $this->flash('success', __('roles.role_created'));
+
+        $this->redirect(route('admin.roles.index'), true);
+
+    }
+
+    public function with()
+    {
+        return [
+            'permissions' => Permission::all(),
+        ];
+    }
+}
+?>
+
 <section class="w-full">
     <x-page-heading>
         <x-slot:title>

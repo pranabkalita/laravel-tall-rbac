@@ -1,3 +1,46 @@
+<?php
+
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Volt\Component;
+
+new
+#[Layout('components.layouts.app')]
+#[Title('Locale')]
+class extends Component
+{
+    public string $locale = '';
+
+    public function mount(): void
+    {
+        $this->locale = auth()->user()->locale;
+    }
+
+    public function updateLocale(): void
+    {
+        $this->validate([
+            'locale' => 'required|string|in:en,da',
+        ]);
+
+        auth()->user()->update([
+            'locale' => $this->locale,
+        ]);
+
+        $this->dispatch('locale-updated', name: auth()->user()->name);
+    }
+
+    public function with(): array
+    {
+        return [
+            'locales' => [
+                'en' => 'English',
+                'da' => 'Danish',
+            ],
+        ];
+    }
+}
+?>
+
 <section class="w-full">
     <x-page-heading>
         <x-slot:title>{{ __('settings.title') }}</x-slot:title>

@@ -1,3 +1,17 @@
+<?php
+
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Volt\Component;
+
+new
+#[Layout('components.layouts.app')]
+#[Title('Appearance')]
+class extends Component
+{
+}
+?>
+
 <div class="flex flex-col items-start">
     <x-page-heading>
         <x-slot:title>{{ __('settings.title') }}</x-slot:title>

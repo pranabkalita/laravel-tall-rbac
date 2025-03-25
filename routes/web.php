@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
-Route::get('/', \App\Livewire\Home::class)->name('home');
+Volt::route('/', 'home')->name('home');
 
-Route::get('/dashboard', \App\Livewire\Dashboard::class)->middleware(['auth', 'verified'])->name('dashboard');
+Volt::route('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function (): void {
 
@@ -14,24 +15,24 @@ Route::middleware(['auth'])->group(function (): void {
 
     // Settings
     Route::redirect('settings', 'settings/profile');
-    Route::get('settings/profile', \App\Livewire\Settings\Profile::class)->name('settings.profile');
-    Route::get('settings/password', \App\Livewire\Settings\Password::class)->name('settings.password');
-    Route::get('settings/appearance', \App\Livewire\Settings\Appearance::class)->name('settings.appearance');
-    Route::get('settings/locale', \App\Livewire\Settings\Locale::class)->name('settings.locale');
+    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
+    Volt::route('settings/password', 'settings.password')->name('settings.password');
+    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Volt::route('settings/locale', 'settings.locale')->name('settings.locale');
 
     // Admin
     Route::prefix('admin')->as('admin.')->group(function (): void {
-        Route::get('/', \App\Livewire\Admin\Index::class)->middleware(['auth', 'verified'])->name('index')->middleware('can:access dashboard');
-        Route::get('/users', \App\Livewire\Admin\Users::class)->name('users.index')->middleware('can:view users');
-        Route::get('/users/create', \App\Livewire\Admin\Users\CreateUser::class)->name('users.create')->middleware('can:create users');
-        Route::get('/users/{user}', \App\Livewire\Admin\Users\ViewUser::class)->name('users.show')->middleware('can:view users');
-        Route::get('/users/{user}/edit', \App\Livewire\Admin\Users\EditUser::class)->name('users.edit')->middleware('can:update users');
-        Route::get('/roles', \App\Livewire\Admin\Roles::class)->name('roles.index')->middleware('can:view roles');
-        Route::get('/roles/create', \App\Livewire\Admin\Roles\CreateRole::class)->name('roles.create')->middleware('can:create roles');
-        Route::get('/roles/{role}/edit', \App\Livewire\Admin\Roles\EditRole::class)->name('roles.edit')->middleware('can:update roles');
-        Route::get('/permissions', \App\Livewire\Admin\Permissions::class)->name('permissions.index')->middleware('can:view permissions');
-        Route::get('/permissions/create', \App\Livewire\Admin\Permissions\CreatePermission::class)->name('permissions.create')->middleware('can:create permissions');
-        Route::get('/permissions/{permission}/edit', \App\Livewire\Admin\Permissions\EditPermission::class)->name('permissions.edit')->middleware('can:update permissions');
+        Volt::route('/', 'admin.index')->middleware(['auth', 'verified'])->name('index')->middleware('can:access dashboard');
+        Volt::route('/users', 'admin.users')->name('users.index')->middleware('can:view users');
+        Volt::route('/users/create', 'admin.users.create-user')->name('users.create')->middleware('can:create users');
+        Volt::route('/users/{user}', 'admin.users.view-user')->name('users.show')->middleware('can:view users');
+        Volt::route('/users/{user}/edit', 'admin.users.edit-user')->name('users.edit')->middleware('can:update users');
+        Volt::route('/roles', 'admin.roles')->name('roles.index')->middleware('can:view roles');
+        Volt::route('/roles/create', 'admin.roles.create-role')->name('roles.create')->middleware('can:create roles');
+        Volt::route('/roles/{role}/edit', 'admin.roles.edit-role')->name('roles.edit')->middleware('can:update roles');
+        Volt::route('/permissions', 'admin.permissions')->name('permissions.index')->middleware('can:view permissions');
+        Volt::route('/permissions/create', 'admin.permissions.create-permission')->name('permissions.create')->middleware('can:create permissions');
+        Volt::route('/permissions/{permission}/edit', 'admin.permissions.edit-permission')->name('permissions.edit')->middleware('can:update permissions');
     });
 });
 

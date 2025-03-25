@@ -1,3 +1,73 @@
+<?php
+
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Volt\Component;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Session;
+use Livewire\Attributes\Url;
+use Livewire\WithPagination;
+use Spatie\Permission\Models\Role;
+
+new
+#[Layout('components.layouts.admin')]
+#[Title('Roles')]
+class extends Component
+{
+    use LivewireAlert;
+    use WithPagination;
+
+    /** @var array<string,string> */
+    protected $listeners = [
+        'roleDeleted' => '$refresh',
+    ];
+
+    #[Session]
+    public int $perPage = 10;
+
+    /** @var array<int,string> */
+    public array $searchableFields = ['name'];
+
+    #[Url]
+    public string $search = '';
+
+    public function mount(): void
+    {
+        $this->authorize('view roles');
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function deleteRole(string $roleId): void
+    {
+        $this->authorize('delete roles');
+
+        $role = Role::query()->where('id', $roleId)->firstOrFail();
+
+        $role->delete();
+
+        $this->alert('success', __('roles.role_deleted'));
+
+        $this->dispatch('roleDeleted');
+    }
+
+    public function with(): array
+    {
+        return [
+            'roles' => Role::query()
+                ->with('permissions')
+                ->when($this->search, function ($query, $search): void {
+                    $query->whereAny($this->searchableFields, 'LIKE', "%$search%");
+                })
+                ->paginate($this->perPage),
+        ];
+    }
+}
+?>
+
 <section class="w-full">
     <x-page-heading>
         <x-slot:title>

@@ -1,3 +1,73 @@
+<?php
+
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Volt\Component;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Session;
+use Livewire\Attributes\Url;
+use Livewire\WithPagination;
+use Spatie\Permission\Models\Permission;
+
+new
+#[Layout('components.layouts.admin')]
+#[Title('Permissions')]
+class extends Component
+{
+    use LivewireAlert;
+    use WithPagination;
+
+    /** @var array<string,string> */
+    protected $listeners = [
+        'permissionDeleted' => '$refresh',
+    ];
+
+    #[Session]
+    public int $perPage = 10;
+
+    /** @var array<int,string> */
+    public array $searchableFields = ['name'];
+
+    #[Url]
+    public string $search = '';
+
+    public function mount(): void
+    {
+        $this->authorize('view permissions');
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function deletePermission(string $permissionId): void
+    {
+
+        $this->authorize('delete permissions');
+
+        $permission = Permission::query()->where('id', $permissionId)->firstOrFail();
+
+        $permission->delete();
+
+        $this->alert('success', __('permissions.permission_deleted'));
+
+        $this->dispatch('permissionDeleted');
+    }
+
+    public function with(): array
+    {
+        return [
+            'permissions' => Permission::query()
+                ->when($this->search, function ($query, $search): void {
+                    $query->whereAny($this->searchableFields, 'LIKE', "%$search%");
+                })
+                ->paginate($this->perPage),
+        ];
+    }
+}
+?>
+
 <section class="w-full">
     <x-page-heading>
         <x-slot:title>{{ __('permissions.title') }}</x-slot:title>
@@ -63,8 +133,7 @@
                                         </flux:button>
                                     </flux:modal.close>
                                     <flux:spacer/>
-                                    <flux:button type="submit" variant="danger"
-                                                 wire:click.prevent="deletePermission('{{ $permission->id }}')">
+                                    <flux:button type="submit" variant="danger" wire:click.prevent="deletePermission('{{ $permission->id }}')">
                                         {{ __('permissions.delete_permission') }}
                                     </flux:button>
                                 </div>
