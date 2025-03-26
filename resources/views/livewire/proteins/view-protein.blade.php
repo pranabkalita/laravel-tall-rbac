@@ -19,6 +19,8 @@ new
 
         public Protein $protein;
 
+        public int $selectedArticle = 0;
+
         #[Session]
         public int $perPage = 10;
 
@@ -33,7 +35,19 @@ new
         #[Url]
         public string $sortDirection = 'desc';
 
-        public function updatingSearch(): void
+
+        public array $mutationsSearchableFields = ['name'];
+
+        #[Url]
+        public string $mutationsSearch = '';
+
+        #[Url]
+        public string $mutationsSortField = 'name';
+
+        #[Url]
+        public string $mutationsSortDirection = 'asc';
+
+        public function updatingMutationsSearch(): void
         {
             $this->resetPage();
         }
@@ -54,6 +68,23 @@ new
             $this->sortField = $field;
         }
 
+        public function mutationsSortBy($field)
+        {
+            if ($this->mutationsSortField === $field) {
+                $this->mutationsSortDirection = $this->mutationsSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                $this->mutationsSortDirection = 'asc';
+            }
+
+            $this->mutationsSortField = $field;
+        }
+
+        public function selectArticle(int $id): void
+        {
+            $this->mutationsSearch = '';
+            $this->selectedArticle = $id;
+        }
+
         public function with(): array
         {
             return [
@@ -63,14 +94,25 @@ new
                         $query->whereAny($this->searchableFields, 'LIKE', "%$search%");
                     })
                     ->orderBy($this->sortField, $this->sortDirection)
-                    ->paginate($this->perPage)
+                    ->paginate($this->perPage),
+                'mutations' => $this->protein->mutations()
+                    ->when($this->selectedArticle, function ($query, $id): void {
+                        $query->where('article_id', $id);
+                    })
+                    ->when($this->mutationsSearch, function ($query, $search): void {
+                        $query->whereAny($this->mutationsSearchableFields, 'LIKE', "%$search%");
+                    })
+                    ->orderBy($this->mutationsSortField, $this->mutationsSortDirection)
+                    ->orderBy('name')
+                    ->get()
+                    ->unique('name')
             ];
         }
     }
 ?>
 
-<div class="flex h-full w-full flex-1 flex-col md:flex-row md:space-y-0 md:space-x-4">
-    <div class="w-full md:w-[70%]">
+<div class="flex w-full flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+    <div class="w-full md:w-[80%]">
         <div class="flex items-center justify-between w-full mb-6 gap-2">
             <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
 
@@ -102,7 +144,7 @@ new
                     <x-table.cell>{!! $article->title !!}</x-table.cell>
                     <x-table.cell>{{ $article->mutations_count }}</x-table.cell>
                     <x-table.cell class="flex justify-end">
-                        <x-text-link href="#">Mutations</x-text-link>
+                        <x-text-link class="cursor-pointer" wire:click.prevent="selectArticle({{ $article->id }})">Mutations</x-text-link>
                     </x-table.cell>
                 </x-table.row>
                 @endforeach
@@ -114,5 +156,26 @@ new
         </div>
     </div>
 
-    <div class="w-full md:w-[30%]"></div>
+    <div class="w-full md:w-[20%]">
+        <div class="flex items-center justify-between w-full mb-6 gap-2">
+            <flux:input wire:model.live="mutationsSearch" placeholder="{{ __('global.search_here') }}" class="w-full" />
+        </div>
+
+        <x-table>
+            <x-slot:head>
+                <x-table.row>
+                    <x-table.heading>{{ __('global.id') }}</x-table.heading>
+                    <x-table.heading sortable wire:click="mutationsSortBy('name')" :direction="$mutationsSortField === 'name' ? $mutationsSortDirection : null">{{ __('mutation.name') }}</x-table.heading>
+                </x-table.row>
+            </x-slot:head>
+            <x-slot:body>
+                @foreach ($mutations as $mutation)
+                <x-table.row wire:key="mutation-{{ $mutation->id }}">
+                    <x-table.cell>{{ $mutation->id }}</x-table.cell>
+                    <x-table.cell>{{ $mutation->name }}</x-table.cell>
+                </x-table.row>
+                @endforeach
+            </x-slot:body>
+        </x-table>
+    </div>
 </div>
