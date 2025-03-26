@@ -24,7 +24,7 @@ new
         #[Session]
         public int $perPage = 10;
 
-        public array $searchableFields = ['title', 'pmid'];
+        public array $searchableFields = ['title', 'pmids'];
 
         #[Url]
         public string $search = '';
@@ -35,10 +35,6 @@ new
         #[Url]
         public string $sortDirection = 'desc';
 
-        public function updatingSearch(): void
-        {
-            $this->resetPage();
-        }
 
         public array $mutationsSearchableFields = ['name'];
 
@@ -51,23 +47,9 @@ new
         #[Url]
         public string $mutationsSortDirection = 'asc';
 
-        #[Session]
-        public int $pdbsPerPage = 10;
-
-        public array $pdbsSearchableFields = ['pdb_id'];
-
-        #[Url]
-        public string $pdbsSearch = '';
-
-        #[Url]
-        public string $pdbsSortField = 'pdb_id';
-
-        #[Url]
-        public string $pdbsSortDirection = 'asc';
-
-        public function updatingPdbsSearch(): void
+        public function updatingMutationsSearch(): void
         {
-            $this->resetPage('pdbsPage');
+            $this->resetPage();
         }
 
         public function mount(Protein $protein): void
@@ -97,17 +79,6 @@ new
             $this->mutationsSortField = $field;
         }
 
-        public function pdbsSortBy($field)
-        {
-            if ($this->pdbsSortField === $field) {
-                $this->pdbsSortDirection = $this->pdbsSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                $this->pdbsSortDirection = 'asc';
-            }
-
-            $this->pdbsSortField = $field;
-        }
-
         public function selectArticle(int $id): void
         {
             $this->mutationsSearch = '';
@@ -134,13 +105,7 @@ new
                     ->orderBy($this->mutationsSortField, $this->mutationsSortDirection)
                     ->orderBy('name')
                     ->get()
-                    ->unique('name'),
-                'pdbs' => $this->protein->pdbs()
-                    ->when($this->pdbsSearch, function ($query, $search): void {
-                        $query->whereAny($this->pdbsSearchableFields, 'LIKE', "%$search%");
-                    })
-                    ->orderBy($this->pdbsSortField, $this->pdbsSortDirection)
-                    ->paginate($this->pdbsPerPage, pageName: 'pdbsPage'),
+                    ->unique('name')
             ];
         }
     }
@@ -225,11 +190,11 @@ new
             <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl">{{ $protein->name }} <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">PDB Ids</span></h1>
 
             <div class="flex items-center justify-between w-full mb-6 gap-2">
-                <flux:input wire:model.live="pdbsSearch" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
+                <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
 
                 <flux:spacer />
 
-                <flux:select wire:model.live="pdbsPerPage" class="!w-auto">
+                <flux:select wire:model.live="perPage" class="!w-auto">
                     <flux:select.option value="10">{{ __('global.10_per_page') }}</flux:select.option>
                     <flux:select.option value="25">{{ __('global.25_per_page') }}</flux:select.option>
                     <flux:select.option value="50">{{ __('global.50_per_page') }}</flux:select.option>
@@ -241,17 +206,21 @@ new
                 <x-slot:head>
                     <x-table.row>
                         <x-table.heading>{{ __('global.id') }}</x-table.heading>
-                        <x-table.heading sortable wire:click="pdbsSortBy('pdb_id')" :direction="$pdbsSortField === 'pdb_id' ? $pdbsSortDirection : null">{{ __('pdb.pdb_id') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('pmid')" :direction="$sortField === 'pmid' ? $sortDirection : null">{{ __('article.pmid') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('title')" :direction="$sortField === 'title' ? $sortDirection : null">{{ __('article.title') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('mutations_count')" :direction="$sortField === 'mutations_count' ? $sortDirection : null">{{ __('article.mutations_count') }}</x-table.heading>
                         <x-table.heading class="text-right">{{ __('global.actions') }}</x-table.heading>
                     </x-table.row>
                 </x-slot:head>
                 <x-slot:body>
-                    @foreach ($pdbs as $pdb)
-                    <x-table.row wire:key="pdb-{{ $pdb->id }}">
-                        <x-table.cell>{{ $pdb->id }}</x-table.cell>
-                        <x-table.cell>{{ $pdb->pdb_id }}</x-table.cell>
+                    @foreach ($articles as $article)
+                    <x-table.row wire:key="article-{{ $article->id }}">
+                        <x-table.cell>{{ $article->id }}</x-table.cell>
+                        <x-table.cell>{{ $article->pmid }}</x-table.cell>
+                        <x-table.cell>{!! $article->title !!}</x-table.cell>
+                        <x-table.cell>{{ $article->mutations_count }}</x-table.cell>
                         <x-table.cell class="flex justify-end">
-                            <x-text-link class="cursor-pointer">3D</x-text-link>
+                            <x-text-link class="cursor-pointer" wire:click.prevent="selectArticle({{ $article->id }})">Mutations</x-text-link>
                         </x-table.cell>
                     </x-table.row>
                     @endforeach
@@ -259,7 +228,7 @@ new
             </x-table>
 
             <div>
-                {{ $pdbs->links(data: ['scrollTo' => false]) }}
+                {{ $articles->links() }}
             </div>
         </div>
     </div>

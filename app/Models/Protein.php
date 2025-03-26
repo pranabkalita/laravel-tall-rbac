@@ -25,4 +25,9 @@ class Protein extends Model
     {
         return $this->hasManyThrough(Mutation::class, Article::class);
     }
+
+    public function pdbs(): HasMany
+    {
+        return $this->hasMany(Pdb::class);
+    }
 }
