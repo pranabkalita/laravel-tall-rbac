@@ -111,52 +111,132 @@ new
     }
 ?>
 
-<div class="flex w-full flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
-    <div class="w-full md:w-[80%]">
-        <div class="flex items-center justify-between w-full mb-6 gap-2">
-            <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
+<div class="flex w-full flex-col lg:flex-row gap-4">
+    <!-- Main Content -->
+    <div class="flex flex-col flex-1 gap-10">
+        <!-- PMIDS -->
+        <div class="bg-gray-50 p-2">
+            <div class="flex items-center justify-between w-full mb-6 gap-2">
+                <h1 class="mb-4 text-xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl">{{ $protein->name }} <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">PMIDs</span></h1>
 
-            <flux:spacer />
+                <!-- <flux:spacer /> -->
 
-            <flux:select wire:model.live="perPage" class="!w-auto">
-                <flux:select.option value="10">{{ __('global.10_per_page') }}</flux:select.option>
-                <flux:select.option value="25">{{ __('global.25_per_page') }}</flux:select.option>
-                <flux:select.option value="50">{{ __('global.50_per_page') }}</flux:select.option>
-                <flux:select.option value="100">{{ __('global.100_per_page') }}</flux:select.option>
-            </flux:select>
+                @if($selectedArticle)
+                <div role="alert" class="relative flex w-[50%] md:w-[30%] rounded-md bg-slate-800 p-3 text-sm text-white">
+                    <b>Selected: </b> &nbsp; {{ $selectedArticle }}
+                    <button
+                        wire:click="selectArticle(0)"
+                        class="absolute top-1.5 right-1.5 flex h-8 w-8 items-center justify-center rounded-md text-white transition-all hover:bg-white/10 active:bg-white/10"
+                        type="button">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            class="h-5 w-5"
+                            strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                @endif
+            </div>
+
+
+            <div class="flex items-center justify-between w-full mb-6 gap-2">
+                <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
+
+                <flux:spacer />
+
+                <flux:select wire:model.live="perPage" class="!w-auto">
+                    <flux:select.option value="10">{{ __('global.10_per_page') }}</flux:select.option>
+                    <flux:select.option value="25">{{ __('global.25_per_page') }}</flux:select.option>
+                    <flux:select.option value="50">{{ __('global.50_per_page') }}</flux:select.option>
+                    <flux:select.option value="100">{{ __('global.100_per_page') }}</flux:select.option>
+                </flux:select>
+            </div>
+
+            <x-table>
+                <x-slot:head>
+                    <x-table.row>
+                        <x-table.heading>{{ __('global.id') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('pmid')" :direction="$sortField === 'pmid' ? $sortDirection : null">{{ __('article.pmid') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('title')" :direction="$sortField === 'title' ? $sortDirection : null">{{ __('article.title') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('mutations_count')" :direction="$sortField === 'mutations_count' ? $sortDirection : null">{{ __('article.mutations_count') }}</x-table.heading>
+                        <x-table.heading class="text-right">{{ __('global.actions') }}</x-table.heading>
+                    </x-table.row>
+                </x-slot:head>
+                <x-slot:body>
+                    @foreach ($articles as $article)
+                    <x-table.row wire:key="article-{{ $article->id }}">
+                        <x-table.cell>{{ $article->id }}</x-table.cell>
+                        <x-table.cell>{{ $article->pmid }}</x-table.cell>
+                        <x-table.cell>{!! $article->title !!}</x-table.cell>
+                        <x-table.cell>{{ $article->mutations_count }}</x-table.cell>
+                        <x-table.cell class="flex justify-end">
+                            <x-text-link class="cursor-pointer" wire:click.prevent="selectArticle({{ $article->id }})">Mutations</x-text-link>
+                        </x-table.cell>
+                    </x-table.row>
+                    @endforeach
+                </x-slot:body>
+            </x-table>
+
+            <div>
+                {{ $articles->links() }}
+            </div>
         </div>
 
-        <x-table>
-            <x-slot:head>
-                <x-table.row>
-                    <x-table.heading>{{ __('global.id') }}</x-table.heading>
-                    <x-table.heading sortable wire:click="sortBy('pmid')" :direction="$sortField === 'pmid' ? $sortDirection : null">{{ __('article.pmid') }}</x-table.heading>
-                    <x-table.heading sortable wire:click="sortBy('title')" :direction="$sortField === 'title' ? $sortDirection : null">{{ __('article.title') }}</x-table.heading>
-                    <x-table.heading sortable wire:click="sortBy('mutations_count')" :direction="$sortField === 'mutations_count' ? $sortDirection : null">{{ __('article.mutations_count') }}</x-table.heading>
-                    <x-table.heading class="text-right">{{ __('global.actions') }}</x-table.heading>
-                </x-table.row>
-            </x-slot:head>
-            <x-slot:body>
-                @foreach ($articles as $article)
-                <x-table.row wire:key="article-{{ $article->id }}">
-                    <x-table.cell>{{ $article->id }}</x-table.cell>
-                    <x-table.cell>{{ $article->pmid }}</x-table.cell>
-                    <x-table.cell>{!! $article->title !!}</x-table.cell>
-                    <x-table.cell>{{ $article->mutations_count }}</x-table.cell>
-                    <x-table.cell class="flex justify-end">
-                        <x-text-link class="cursor-pointer" wire:click.prevent="selectArticle({{ $article->id }})">Mutations</x-text-link>
-                    </x-table.cell>
-                </x-table.row>
-                @endforeach
-            </x-slot:body>
-        </x-table>
+        <div class="bg-gray-50 p-2">
+            <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl">{{ $protein->name }} <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">PDB Ids</span></h1>
 
-        <div>
-            {{ $articles->links() }}
+            <div class="flex items-center justify-between w-full mb-6 gap-2">
+                <flux:input wire:model.live="search" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
+
+                <flux:spacer />
+
+                <flux:select wire:model.live="perPage" class="!w-auto">
+                    <flux:select.option value="10">{{ __('global.10_per_page') }}</flux:select.option>
+                    <flux:select.option value="25">{{ __('global.25_per_page') }}</flux:select.option>
+                    <flux:select.option value="50">{{ __('global.50_per_page') }}</flux:select.option>
+                    <flux:select.option value="100">{{ __('global.100_per_page') }}</flux:select.option>
+                </flux:select>
+            </div>
+
+            <x-table>
+                <x-slot:head>
+                    <x-table.row>
+                        <x-table.heading>{{ __('global.id') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('pmid')" :direction="$sortField === 'pmid' ? $sortDirection : null">{{ __('article.pmid') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('title')" :direction="$sortField === 'title' ? $sortDirection : null">{{ __('article.title') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="sortBy('mutations_count')" :direction="$sortField === 'mutations_count' ? $sortDirection : null">{{ __('article.mutations_count') }}</x-table.heading>
+                        <x-table.heading class="text-right">{{ __('global.actions') }}</x-table.heading>
+                    </x-table.row>
+                </x-slot:head>
+                <x-slot:body>
+                    @foreach ($articles as $article)
+                    <x-table.row wire:key="article-{{ $article->id }}">
+                        <x-table.cell>{{ $article->id }}</x-table.cell>
+                        <x-table.cell>{{ $article->pmid }}</x-table.cell>
+                        <x-table.cell>{!! $article->title !!}</x-table.cell>
+                        <x-table.cell>{{ $article->mutations_count }}</x-table.cell>
+                        <x-table.cell class="flex justify-end">
+                            <x-text-link class="cursor-pointer" wire:click.prevent="selectArticle({{ $article->id }})">Mutations</x-text-link>
+                        </x-table.cell>
+                    </x-table.row>
+                    @endforeach
+                </x-slot:body>
+            </x-table>
+
+            <div>
+                {{ $articles->links() }}
+            </div>
         </div>
     </div>
 
-    <div class="w-full md:w-[20%]">
+    <!-- Sidebar -->
+    <div class="w-full lg:w-64 bg-gray-50 p-2">
+        <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl"><span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Mutations</span></h1>
+
         <div class="flex items-center justify-between w-full mb-6 gap-2">
             <flux:input wire:model.live="mutationsSearch" placeholder="{{ __('global.search_here') }}" class="w-full" />
         </div>
