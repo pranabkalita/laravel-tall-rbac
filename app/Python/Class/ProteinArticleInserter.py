@@ -28,13 +28,15 @@ class ProteinArticleInserter:
 
             # Check if the file exists
             if os.path.isfile(filename):
-                print("Importing articles for protein : " + protein_name)
+                print(f"Importing articles for protein : {protein_name}")
                 # Read the contents of the file
                 with open(filename, 'r') as file:
                     pmids = file.readlines()
 
                 # Clean the PMIDs and prepare for insertion into the database
-                pmids = [pmid.strip() for pmid in pmids]  # Strip any surrounding whitespace/newlines
+                pmids = [pmid.strip() for pmid in pmids if pmid.strip()]  # Remove empty lines and strip whitespace
+
+                print(f"Importing {len(pmids)} valid articles for protein {protein_name}.")
 
                 # Prepare the batch for insertion
                 current_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -44,13 +46,16 @@ class ProteinArticleInserter:
                     # If we've reached the batch size, insert the batch and reset the list
                     if len(articles_to_insert) >= batch_size:
                         self.insert_articles_batch(articles_to_insert)
-                        articles_to_insert = []
+                        articles_to_insert = []  # Reset the batch list after each insertion
 
                 # After the loop, insert any remaining articles that didn't reach the batch size
                 if articles_to_insert:
                     self.insert_articles_batch(articles_to_insert)
 
-                print("Complete Importing articles for protein : " + protein_name)
+                # Reset the articles_to_insert list explicitly after each protein's processing
+                articles_to_insert = []  # Explicitly reset for each protein
+
+                print(f"Complete Importing articles for protein : {protein_name}")
                 print("-------------------------------------------")
 
             else:
@@ -64,11 +69,9 @@ class ProteinArticleInserter:
         """
         self.cursor.executemany(insert_query, articles)
         self.db.commit()
-        print(f"Inserted {len(articles)} articles into the database.")
 
     def close(self):
         """Close the cursor and the database connection."""
         self.cursor.close()
         self.db.close()
         print("Database connection closed.")
-
