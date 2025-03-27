@@ -19,6 +19,8 @@ new
 
         public Protein $protein;
 
+
+        // ARTICLES
         public int $selectedArticle = 0;
 
         #[Session]
@@ -40,6 +42,12 @@ new
             $this->resetPage();
         }
 
+        public function updatingPerPage(): void
+        {
+            $this->resetPage();
+        }
+
+        // MUTATIONS
         public array $mutationsSearchableFields = ['name'];
 
         #[Url]
@@ -51,6 +59,7 @@ new
         #[Url]
         public string $mutationsSortDirection = 'asc';
 
+        // PDBS
         #[Session]
         public int $pdbsPerPage = 10;
 
@@ -66,6 +75,11 @@ new
         public string $pdbsSortDirection = 'asc';
 
         public function updatingPdbsSearch(): void
+        {
+            $this->resetPage('pdbsPage');
+        }
+
+        public function updatingPdbsPerPage(): void
         {
             $this->resetPage('pdbsPage');
         }
@@ -141,6 +155,7 @@ new
                     })
                     ->orderBy($this->pdbsSortField, $this->pdbsSortDirection)
                     ->paginate($this->pdbsPerPage, pageName: 'pdbsPage'),
+                'all_pdb_ids' => $this->protein->pdbs()->pluck('pdb_id')->toArray()
             ];
         }
     }
@@ -202,9 +217,9 @@ new
                     </x-table.row>
                 </x-slot:head>
                 <x-slot:body>
-                    @foreach ($articles as $article)
+                    @foreach ($articles as $index => $article)
                     <x-table.row wire:key="article-{{ $article->id }}">
-                        <x-table.cell>{{ $article->id }}</x-table.cell>
+                        <x-table.cell>{{ $articles->firstItem() + $index }}</x-table.cell>
                         <x-table.cell>{{ $article->pmid }}</x-table.cell>
                         <x-table.cell>{!! $article->title !!}</x-table.cell>
                         <x-table.cell>{{ $article->mutations_count }}</x-table.cell>
@@ -222,7 +237,14 @@ new
         </div>
 
         <div class="bg-gray-50 p-2">
-            <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl">{{ $protein->name }} <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">PDB Ids</span></h1>
+            <div class="flex items-center justify-between w-full mb-6 gap-2">
+                <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl">{{ $protein->name }} <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">PDB Ids</span></h1>
+
+                <div role="alert" class="relative flex w-[50%] md:w-[30%] rounded-md bg-slate-800 p-3 text-sm text-white">
+                    <a href="https://molstar.org/viewer/?pdb={{ implode(',', $all_pdb_ids) }}&snapshot-url-type=molj&pixel-scale=4" target="_blank">Merge 3D Structures</a>
+                </div>
+
+            </div>
 
             <div class="flex items-center justify-between w-full mb-6 gap-2">
                 <flux:input wire:model.live="pdbsSearch" placeholder="{{ __('global.search_here') }}" class="!w-auto" />
@@ -234,24 +256,27 @@ new
                     <flux:select.option value="25">{{ __('global.25_per_page') }}</flux:select.option>
                     <flux:select.option value="50">{{ __('global.50_per_page') }}</flux:select.option>
                     <flux:select.option value="100">{{ __('global.100_per_page') }}</flux:select.option>
+                    https://www.rcsb.org/structure/4YJL
                 </flux:select>
             </div>
-
             <x-table>
                 <x-slot:head>
                     <x-table.row>
                         <x-table.heading>{{ __('global.id') }}</x-table.heading>
-                        <x-table.heading sortable wire:click="pdbsSortBy('pdb_id')" :direction="$pdbsSortField === 'pdb_id' ? $pdbsSortDirection : null">{{ __('pdb.pdb_id') }}</x-table.heading>
+                        <x-table.heading sortable wire:click="pdbsSortBy('pdb_id')" :direction="$pdbsSortField === 'pdb_id' ? $pdbsSortDirection : null">{{ __('pdb.pdb_ids') }}</x-table.heading>
                         <x-table.heading class="text-right">{{ __('global.actions') }}</x-table.heading>
                     </x-table.row>
                 </x-slot:head>
                 <x-slot:body>
-                    @foreach ($pdbs as $pdb)
+                    @foreach ($pdbs as $index => $pdb)
                     <x-table.row wire:key="pdb-{{ $pdb->id }}">
-                        <x-table.cell>{{ $pdb->id }}</x-table.cell>
-                        <x-table.cell>{{ $pdb->pdb_id }}</x-table.cell>
+                        <x-table.cell>{{ $pdbs->firstItem() + $index }}</x-table.cell>
+                        <x-table.cell>
+                            <a href="https://www.rcsb.org/structure/{{ $pdb->pdb_id }}" target="_blank" class="underline text-sm decoration-neutral-400 underline-offset-2 duration-300 ease-out hover:decoration-neutral-700 text-neutral-900 dark:text-neutral-200 dark:hover:decoration-neutral-100">{{ $pdb->pdb_id }}</a>
+
+                        </x-table.cell>
                         <x-table.cell class="flex justify-end">
-                            <x-text-link class="cursor-pointer">3D</x-text-link>
+                            <a class="underline text-sm decoration-neutral-400 underline-offset-2 duration-300 ease-out hover:decoration-neutral-700 text-neutral-900 dark:text-neutral-200 dark:hover:decoration-neutral-100" href="https://molstar.org/viewer/?pdb={{ $pdb->pdb_id }}" target="_blank">3D Structure Visualization</a>
                         </x-table.cell>
                     </x-table.row>
                     @endforeach
@@ -280,9 +305,9 @@ new
                 </x-table.row>
             </x-slot:head>
             <x-slot:body>
-                @foreach ($mutations as $mutation)
+                @foreach ($mutations as $index => $mutation)
                 <x-table.row wire:key="mutation-{{ $mutation->id }}">
-                    <x-table.cell>{{ $mutation->id }}</x-table.cell>
+                    <x-table.cell>{{ $index + 1 }}</x-table.cell>
                     <x-table.cell>{{ $mutation->name }}</x-table.cell>
                 </x-table.row>
                 @endforeach

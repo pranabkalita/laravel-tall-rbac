@@ -37,6 +37,11 @@ new
             $this->resetPage();
         }
 
+        public function updatingPerPage(): void
+        {
+            $this->resetPage();
+        }
+
         public function sortBy($field)
         {
             if ($this->sortField === $field) {
@@ -59,6 +64,7 @@ new
                         WHERE a.protein_id = proteins.id
                     ) as mutations_count')
                     ->withCount('articles')
+                    ->withCount('pdbs')
                     ->when($this->search, function ($query, $search): void {
                         $query->whereAny($this->searchableFields, 'LIKE', "%$search%");
                     })
@@ -90,20 +96,22 @@ new
                 <x-table.heading sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null">{{ __('protein.name') }}</x-table.heading>
                 <x-table.heading sortable wire:click="sortBy('articles_count')" :direction="$sortField === 'articles_count' ? $sortDirection : null">{{ __('protein.pmids') }}</x-table.heading>
                 <x-table.heading sortable wire:click="sortBy('mutations_count')" :direction="$sortField === 'mutations_count' ? $sortDirection : null">{{ __('protein.mutations') }}</x-table.heading>
+                <x-table.heading sortable wire:click="sortBy('pdbs_count')" :direction="$sortField === 'pdbs_count' ? $sortDirection : null">{{ __('protein.pdbs') }}</x-table.heading>
                 <x-table.heading class="text-right">{{ __('global.actions') }}</x-table.heading>
             </x-table.row>
         </x-slot:head>
         <x-slot:body>
-            @foreach ($proteins as $protein)
+            @foreach ($proteins as $index => $protein)
             <x-table.row wire:key="protein-{{ $protein->id }}">
-                <x-table.cell>{{ $protein->id }}</x-table.cell>
+                <x-table.cell>{{ $proteins->firstItem() + $index }}</x-table.cell>
                 <x-table.cell>
                     <x-text-link href="{{ route('proteins.show', $protein->name) }}">{{ $protein->name }}</x-text-link>
                 </x-table.cell>
                 <x-table.cell>{{ $protein->articles_count }}</x-table.cell>
                 <x-table.cell>{{ $protein->mutations_count }}</x-table.cell>
+                <x-table.cell>{{ $protein->pdbs_count }}</x-table.cell>
                 <x-table.cell class="flex justify-end">
-                    <x-text-link href="#">Mutations List</x-text-link>
+                    <x-text-link href="#">Export</x-text-link>
                 </x-table.cell>
             </x-table.row>
             @endforeach

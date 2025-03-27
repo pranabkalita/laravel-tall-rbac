@@ -36,7 +36,9 @@ Route::middleware(['auth'])->group(function (): void {
     });
 });
 
-Volt::route('/proteins', 'proteins')->name('proteins.index');
-Volt::route('/proteins/{protein:name}', 'proteins.view-protein')->name('proteins.show');
+Route::prefix('mutamine')->group(function () {
+    Volt::route('/proteins', 'proteins')->name('proteins.index');
+    Volt::route('/proteins/{protein:name}', 'proteins.view-protein')->name('proteins.show');
+});
 
 require __DIR__ . '/auth.php';

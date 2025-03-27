@@ -8,7 +8,7 @@
     <span class="text-left text-xs leading-4 font-medium uppercase tracking-wider">{{ $slot }}</span>
     @else
     <button
-        {{ $attributes->except('class') }} class="flex items-center space-x-1 text-left text-xs leading-4 font-medium">
+        {{ $attributes->except('class') }} class="flex items-center space-x-1 text-left text-xs leading-4 font-medium cursor-pointer">
 
         <span> {{ $slot }}</span>
 

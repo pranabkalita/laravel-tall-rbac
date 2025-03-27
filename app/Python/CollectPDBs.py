@@ -13,7 +13,7 @@ if __name__ == "__main__":
     pdb_service = PDBService(db_config)
     proteins = pdb_service.fetch_proteins()
 
-    processed_count = 0  # Counter for processed proteins
+    processed_count = 0
 
     for protein_id, protein_name in proteins:
         print('*****************************************************')

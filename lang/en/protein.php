@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Protein',
-    'pmids' => 'PMIDs',
-    'mutations' => 'Mutations'
+    'pmids' => 'PMID(s)',
+    'mutations' => 'Mutation(s)',
+    'pdbs' => 'PDB Id(s)'
 ];

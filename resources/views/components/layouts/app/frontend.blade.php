@@ -21,7 +21,11 @@
             @endauth
 
             <flux:navbar.item icon="layout-grid" href="{{ route('proteins.index') }}" :current="request()->routeIs('proteins.index')" wire:navigate>
-                Proteins
+                MutaMine
+            </flux:navbar.item>
+
+            <flux:navbar.item icon="layout-grid" href="#" disabled>
+                MutaScore (Coming Soon)
             </flux:navbar.item>
         </flux:navbar>
 
@@ -119,20 +123,24 @@
         <a href="{{ route('dashboard') }}" class="ml-1 flex items-center space-x-2">
             <x-app-logo class="size-8" href="#"></x-app-logo>
         </a>
-        @auth
+
         <flux:navlist variant="outline">
             <flux:navlist.group heading="Platform">
+                @auth
                 <flux:navlist.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">
                     Dashboard
                 </flux:navlist.item>
+                @endauth
 
                 <flux:navlist.item icon="layout-grid" href="{{ route('proteins.index') }}" :current="request()->routeIs('proteins.index')">
-                    Proteins
+                    MutaMine
+                </flux:navlist.item>
+
+                <flux:navlist.item icon="layout-grid" href="#" disabled>
+                    MutaScore (Coming Soon)
                 </flux:navlist.item>
             </flux:navlist.group>
         </flux:navlist>
-        @endauth
-
         <flux:spacer />
 
     </flux:sidebar>

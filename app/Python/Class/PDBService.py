@@ -39,13 +39,15 @@ class PDBService:
 
     def fetch_proteins(self):
         """Fetch proteins from the database."""
-        self.cursor.execute("SELECT id, name FROM proteins WHERE name > 'HLA-C' ORDER BY name ASC")
+        self.cursor.execute("SELECT id, name FROM proteins p WHERE p.name > 'HLA-C' AND p.name NOT IN ('C-KIT', 'c-MET', 'C-Myc', 'HLA-B', 'N-Myc', 'NF-KB', 'HLA-C') ORDER BY p.name ASC")
         return self.cursor.fetchall()
 
     def make_request(self, payload: Dict) -> requests.Response:
         headers = {'Content-Type': 'application/json'}
         response = self.client.post(self.url, json=payload, headers=headers)
+
         return response
+
 
     def get_pdb_count(self) -> int:
         payload = self.payload.copy()
@@ -89,11 +91,14 @@ class PDBService:
             print("No results found.")
             return {}
 
-        payload = self.payload.copy()
+        payload = self.payload.copy()  # Ensure a fresh payload for each request
         payload['query']['parameters']['value'] = self.protein
         payload['request_options']['paginate']['rows'] = count
 
         try:
+            # Reset session (if you're reusing session across requests, do this)
+            self.client = requests.Session()  # Re-initialize the session
+
             # Send POST request to fetch data
             response = self.make_request(payload)
 
