@@ -240,9 +240,9 @@ new
             <div class="flex items-center justify-between w-full mb-6 gap-2">
                 <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-3xl">{{ $protein->name }} <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">PDB Ids</span></h1>
 
-                <div role="alert" class="relative flex w-[50%] md:w-[30%] rounded-md bg-slate-800 p-3 text-sm text-white">
+                <!-- <div role="alert" class="relative flex w-[50%] md:w-[30%] rounded-md bg-slate-800 p-3 text-sm text-white">
                     <a href="https://molstar.org/viewer/?pdb={{ implode(',', $all_pdb_ids) }}&snapshot-url-type=molj&pixel-scale=4" target="_blank">Merge 3D Structures</a>
-                </div>
+                </div> -->
 
             </div>
 
@@ -276,7 +276,15 @@ new
 
                         </x-table.cell>
                         <x-table.cell class="flex justify-end">
-                            <a class="underline text-sm decoration-neutral-400 underline-offset-2 duration-300 ease-out hover:decoration-neutral-700 text-neutral-900 dark:text-neutral-200 dark:hover:decoration-neutral-100" href="https://molstar.org/viewer/?pdb={{ $pdb->pdb_id }}" target="_blank">3D Structure Visualization</a>
+                            <a class="underline text-sm decoration-neutral-400 underline-offset-2 duration-300 ease-out hover:decoration-neutral-700 text-neutral-900 dark:text-neutral-200 dark:hover:decoration-neutral-100 flex items-center md:border md:border-gray-300 md:rounded md:p-0.5 hover:bg-gray-300" href="https://molstar.org/viewer/?pdb={{ $pdb->pdb_id }}" target="_blank">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1 hidden md:block">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                                </svg>
+                                Explore in 3D
+                            </a>
+
+
+
                         </x-table.cell>
                     </x-table.row>
                     @endforeach

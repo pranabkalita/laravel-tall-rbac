@@ -39,7 +39,7 @@ class PDBService:
 
     def fetch_proteins(self):
         """Fetch proteins from the database."""
-        self.cursor.execute("SELECT id, name FROM proteins p WHERE p.name > 'HLA-C' AND p.name NOT IN ('C-KIT', 'c-MET', 'C-Myc', 'HLA-B', 'N-Myc', 'NF-KB', 'HLA-C') ORDER BY p.name ASC")
+        self.cursor.execute("SELECT id, name FROM proteins p WHERE p.name = 'KRAS'")
         return self.cursor.fetchall()
 
     def make_request(self, payload: Dict) -> requests.Response:

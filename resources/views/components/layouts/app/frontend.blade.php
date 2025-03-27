@@ -20,7 +20,7 @@
             </flux:navbar.item>
             @endauth
 
-            <flux:navbar.item icon="layout-grid" href="{{ route('proteins.index') }}" :current="request()->routeIs('proteins.index')" wire:navigate>
+            <flux:navbar.item icon="layout-grid" href="{{ route('mutamine.proteins.index') }}" :current="request()->routeIs('mutamine.proteins.index')" wire:navigate>
                 MutaMine
             </flux:navbar.item>
 
@@ -132,7 +132,7 @@
                 </flux:navlist.item>
                 @endauth
 
-                <flux:navlist.item icon="layout-grid" href="{{ route('proteins.index') }}" :current="request()->routeIs('proteins.index')">
+                <flux:navlist.item icon="layout-grid" href="{{ route('mutamine.proteins.index') }}" :current="request()->routeIs('mutamine.proteins.index')">
                     MutaMine
                 </flux:navlist.item>
 
