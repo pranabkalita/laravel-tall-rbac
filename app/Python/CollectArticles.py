@@ -1,15 +1,20 @@
 from Class.EdirectEntrez import EdirectEntrez
+from dotenv import load_dotenv
+import os
 
 from sqlalchemy import create_engine, text
 
 email = "your-email@example.com"
 
+load_dotenv()
+
 # Database configuration
 db_config = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': '',
-    'database': 'biostation_tall'
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USERNAME'),
+    'password': os.getenv('DB_PASSWORD'),
+    'database': os.getenv('DB_DATABASE'),
+    'port': os.getenv('DB_PORT', 3306)
 }
 
 # SQLAlchemy connection string

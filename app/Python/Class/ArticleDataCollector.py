@@ -25,12 +25,12 @@ class ArticleDataCollector:
         """
         protein_query = """
         SELECT proteins.*,
-            (
-                SELECT COUNT(*)
-                FROM articles
-                WHERE articles.protein_id = proteins.id
-                AND articles.title IS NULL
-            ) AS articles_count
+        (
+            SELECT COUNT(*)
+            FROM articles
+            WHERE articles.protein_id = proteins.id
+            AND articles.title IS NULL
+        ) AS articles_count
         FROM proteins
         WHERE EXISTS (
             SELECT 1

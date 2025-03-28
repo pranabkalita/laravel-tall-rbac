@@ -5,6 +5,8 @@ from sqlalchemy.exc import SQLAlchemyError
 import re
 from sqlalchemy import create_engine, text
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
 
 class ProteinProcessor:
@@ -15,10 +17,11 @@ class ProteinProcessor:
 
         # Database configuration
         db_config = {
-            'host': '127.0.0.1',
-            'user': 'root',
-            'password': '',
-            'database': 'biostation_tall'
+            'host': os.getenv('DB_HOST'),
+            'user': os.getenv('DB_USERNAME'),
+            'password': os.getenv('DB_PASSWORD'),
+            'database': os.getenv('DB_DATABASE'),
+            'port': os.getenv('DB_PORT', 3306)
         }
 
         # SQLAlchemy connection string

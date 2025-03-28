@@ -1,13 +1,18 @@
 import time
 from Class.PDBService import PDBService
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 if __name__ == "__main__":
     # Database configuration
     db_config = {
-        'host': '127.0.0.1',
-        'user': 'root',
-        'password': '',
-        'database': 'biostation_tall'
+        'host': os.getenv('DB_HOST'),
+        'user': os.getenv('DB_USERNAME'),
+        'password': os.getenv('DB_PASSWORD'),
+        'database': os.getenv('DB_DATABASE'),
+        'port': os.getenv('DB_PORT', 3306)
     }
 
     pdb_service = PDBService(db_config)

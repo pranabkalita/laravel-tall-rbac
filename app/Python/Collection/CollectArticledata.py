@@ -2,13 +2,18 @@ from sqlalchemy import create_engine, text
 from bprotein_chron import BProteinChron
 from xml_service import XmlService
 from protein_processor import ProteinProcessor
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Database configuration
 db_config = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': '',
-    'database': 'biostation_tall'
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USERNAME'),
+    'password': os.getenv('DB_PASSWORD'),
+    'database': os.getenv('DB_DATABASE'),
+    'port': os.getenv('DB_PORT', 3306)
 }
 
 # SQLAlchemy connection string
@@ -18,12 +23,12 @@ engine = create_engine(connection_string)
 # Query to get mutation data for each protein
 protein_query = """
 SELECT proteins.*,
-    (
-      SELECT COUNT(*)
-      FROM articles
-      WHERE articles.protein_id = proteins.id
-      AND articles.title IS NULL
-    ) AS articles_count
+(
+    SELECT COUNT(*)
+    FROM articles
+    WHERE articles.protein_id = proteins.id
+    AND articles.title IS NULL
+) AS articles_count
 FROM proteins
 WHERE EXISTS (
     SELECT 1
